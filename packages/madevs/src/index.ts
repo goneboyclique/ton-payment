@@ -6,7 +6,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const envPath = resolve(__dirname, '../../..', '.env');
+const envPath = resolve(__dirname, "../../..", ".env");
 
 loadEnvFile(envPath);
 
@@ -17,14 +17,18 @@ const apiUrl = tunnel.url();
 
 const isWindows = process.platform === "win32";
 
-const turbo = spawn(isWindows ? "pnpm.cmd" : "pnpm", ["-w", "exec", "turbo", "dev"], {
-  stdio: "inherit",
-  shell: true,
-  env: {
-    ...process.env,
-    VITE_API_URL: apiUrl,
+const turbo = spawn(
+  isWindows ? "pnpm.cmd" : "pnpm",
+  ["-w", "exec", "turbo", "dev"],
+  {
+    stdio: "inherit",
+    shell: true,
+    env: {
+      ...process.env,
+      VITE_API_URL: apiUrl,
+    },
   },
-});
+);
 
 const shutdown = async () => {
   await tunnel?.close();

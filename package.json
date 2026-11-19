@@ -4,7 +4,7 @@
   "author": "clay.zenx@gmail.com",
   "type": "module",
   "description": "Self-hostable payment service for TON and USDT (jetton) payments",
-  "packageManager": "pnpm@11.18.0",
+  "packageManager": "pnpm@12.21.0",
   "lint-staged": {
     "*.{js,ts,vue,css,md,json}": "prettier --write"
   },

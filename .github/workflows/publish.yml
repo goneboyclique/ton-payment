@@ -2,13 +2,13 @@ name: Publish TON Payment API
 
 on:
   push:
-    branches: [master]
+    branches: [madevs-mp]
     paths:
-      - 'apps/ton-payment/**'
+      - 'apps/api/**'
       - 'packages/**'
       - 'pnpm-lock.yaml'
       - 'package.json'
-      - '.github/workflows/publish-payment.yml'
+      - '.github/workflows/publish.yml'
 
 permissions:
   contents: read
@@ -16,7 +16,7 @@ permissions:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: username/ton-payment-api
+  IMAGE_NAME: goneboyclique/ton-payment-api
 
 jobs:
   publish:
@@ -29,14 +29,14 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: clayzenx
+          username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: apps/ton-payment/Dockerfile
+          file: apps/api/Dockerfile
           push: true
           tags: ghcr.io/${{ env.IMAGE_NAME }}:latest
 

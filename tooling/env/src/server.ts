@@ -1,7 +1,9 @@
 import { z } from "zod";
 import { configDotenv } from "dotenv";
 
-configDotenv();
+configDotenv({
+  path: "../../.env",
+});
 
 export const serverEnvSchema = z.object({
   DATABASE_URL: z.url().min(1),

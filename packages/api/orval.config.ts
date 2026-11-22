@@ -1,12 +1,17 @@
 import { z } from "zod";
 import { configDotenv } from "dotenv";
 
-configDotenv();
+// load env
+configDotenv({
+  path: "../../.env",
+});
 
+// prepare schema
 const orvalConfigSchema = z.object({
   OPENAPI_INPUT_SRC: z.url(),
 });
 
+// parse & validation
 const env = orvalConfigSchema.parse(process.env);
 const input = env.OPENAPI_INPUT_SRC;
 

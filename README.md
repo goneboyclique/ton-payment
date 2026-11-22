@@ -36,15 +36,9 @@ pnpm install
 
 Mixing these up is the usual cause of "works locally, breaks in docker":
 
-| file                | read by                                               | db host     |
-| ------------------- | ----------------------------------------------------- | ----------- |
-| `.env` (root)       | `docker compose`, **the API in dev**, Vite (mini-app) | `localhost` |
-| `packages/db/.env`  | prisma CLI (`db:generate`, `db:migrate`, `db:deploy`) | `localhost` |
-| `packages/api/.env` | orval (`sdk:generate`)                                | n/a         |
-
-Inside containers the database host is `postgres`, not `localhost`: compose
-assembles the container `DATABASE_URL` from `POSTGRES_USER` / `POSTGRES_PASSWORD` /
-`POSTGRES_DB`, so the root `DATABASE_URL` (host tooling) is ignored by containers.
+| file          | read by                                               | db host     |
+| ------------- | ----------------------------------------------------- | ----------- |
+| `.env` (root) | `docker compose`, **the API in dev**, Vite (mini-app) | `localhost` |
 
 The API validates its env with `tooling/env/src/tma-api.ts`, which loads
 `../../.env` relative to `apps/api` — i.e. the **root `.env`**. Keep all API
@@ -52,9 +46,9 @@ variables there;
 
 ```sh
 cp .env.example .env
-cp packages/db/.env.example packages/db/.env
-cp packages/api/.env.example packages/api/.env
 ```
+
+then set up your variables
 
 API variables (validated with zod at boot; the process exits if a required one is missing):
 
@@ -82,21 +76,34 @@ Tooling only: `OPENAPI_INPUT_SRC` (orval input, default `http://localhost:4000/a
 
 ### Start local infrastructure
 
+If you need local postgres you can use repo compose
+
 ```sh
 docker compose up postgres --detach
 ```
 
+Insteed you should provide your DATABASE_URL before next step
+
 ### Database
 
-Requires `packages/db/.env` and a running PostgreSQL:
+Requires `DATABASE_URL`
+Generate repo API schemas and run migration
 
 ```sh
 pnpm db:generate   # prisma client + Zod schemas (packages/db/generated, do not edit)
 pnpm db:migrate    # prisma migrate dev (creates + applies migrations)
-pnpm format
 ```
 
 Re-run `pnpm db:generate` after every `schema.prisma` change.
+
+### SDK client
+
+if you want to use orval sdk client methods you should generate client from your openapi json. You can start server `pnpm dev --filter api`.
+it starts server on 4000 port and /api-json on them. SDK generator use OPENAPI_INPUT_SRC with `localhost:4000/api-json` by default so you can run
+```sh
+pnpm sdk:generate
+pnpm format  # just for formating sdk generated code
+```
 
 ## Run (development)
 
@@ -104,27 +111,13 @@ Re-run `pnpm db:generate` after every `schema.prisma` change.
 pnpm dev            # turbo dev: API (nest --watch, :4000) + mini-app (vite)
 pnpm start:tg-dev   # same, but first opens a public tunnel (untun) to :4000 and
                     # exports it as VITE_API_URL so Telegram can reach your machine
+pnpm dev --filter {specific apps} # start dev server for choised apps
 ```
 
-- If you gona work with repo mini-app package you should generate client sdk for it `pnpm sdk:generate`
-- Swagger UI: `http://localhost:4000/api`, OpenAPI JSON: `http://localhost:4000/api-json`
-- Mini App dev URL is served under the `/tma` base path; Telegram requires HTTPS,
-  so test inside Telegram through a tunnel (`start:tg-dev`) or with `VITE_HTTPS=true`.
-- Outside Telegram the Mini App mocks the Telegram environment (`src/mockEnv.ts`, dev only).
-
 API only / mini-app only:
-
 ```sh
 pnpm --filter api dev
 pnpm --filter tma dev
-```
-
-### Client SDK
-
-With the API running (needs `OPENAPI_INPUT_SRC`, see `packages/api/.env.example`):
-
-```sh
-pnpm sdk:generate   # regenerates packages/api/clients/{core,vue}.ts, then formats
 ```
 
 ## Test and lint
@@ -134,10 +127,6 @@ pnpm lint
 pnpm test                                          # vitest (turbo builds deps first)
 pnpm --filter api exec vitest run path/to/file.spec.ts   # single test file
 ```
-
-Tests currently cover the on-chain verification path: TON/jetton cell
-encode-decode and `TonTransactionService.verify`, including the case where a
-worthless jetton tries to settle a payment. They need no database or network.
 
 ## Build
 
@@ -163,7 +152,7 @@ docker build -f apps/api/Dockerfile -t ton-payment-api:latest .
 Then deploy on the server with the compose stack (root `.env` is the only file to edit):
 
 ```sh
-cp .env.example .env    # set POSTGRES_PASSWORD, CORS_ORIGINS, secrets below
+cp .env.example .env    # then set your variables
 docker compose up --detach --build
 ```
 
@@ -179,31 +168,6 @@ Stack (`docker-compose.yaml`):
 Missing required variables abort `docker compose` by name before anything starts:
 the `api` service passes every variable the env schema requires, and the schema
 is validated at boot.
-
-Useful commands:
-
-```sh
-docker compose config               # render resolved config, validates env vars
-docker compose logs -f api
-docker compose up -d api            # redeploy api (migrate re-runs first)
-docker compose down -v              # WARNING: deletes the postgres volume
-```
-
-### Standalone customer deployment
-
-`docker-compose.customer.yml` is a self-contained stack (own PostgreSQL, no `.env`),
-pulling `ghcr.io/clayzenx/ton-payment-api` (override with `API_IMAGE`):
-
-```sh
-docker compose -f docker-compose.customer.yml up -d
-```
-
-All values are inlined as `CHANGE_ME` placeholders and must be edited before use
-(DB password, `CORS_ORIGINS`, `TELEGRAM_BOT_TOKEN`, `PAYMENT_WALLET`,
-`TONCENTER_API_KEY`, `USDT_JETTON_MASTER`).
-
-> Earlier revisions of this file committed a real bot token and TON Center API
-> key. They are still in git history — rotate both.
 
 ### Mini App
 

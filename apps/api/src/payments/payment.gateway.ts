@@ -13,6 +13,8 @@ import { CORS_ORIGINS } from 'src/common/constants/env.constants';
 type EventType = 'payment.updated';
 type PayloadType = PaymentType;
 
+console.log('CORS_ORIGINS', CORS_ORIGINS);
+
 @WebSocketGateway({
   namespace: 'ton-payment',
   cors: {
@@ -42,7 +44,6 @@ export class PaymentGateway {
   }
 
   emitUpdate(clientId: string, eventType: EventType, payload: PayloadType) {
-    this.logger.log(`event ${eventType} with payload: ${payload} sended to ${clientId}`)
     this.server.to(clientId).emit(eventType, payload);
   }
 }

@@ -42,6 +42,7 @@ export class PaymentGateway {
   }
 
   emitUpdate(clientId: string, eventType: EventType, payload: PayloadType) {
+    this.logger.log(`event ${eventType} with payload: ${payload} sended to ${clientId}`)
     this.server.to(clientId).emit(eventType, payload);
   }
 }

@@ -9,7 +9,7 @@ import { TelegramAuthGuard } from 'src/common/guards/telegram-auth.guard';
 import { TelegramUser } from 'src/common/decorators/telegram-user.decorator';
 import type { TelegramUser as TmaUser } from 'src/common/types/tgUser.type';
 
-@Controller('user')
+@Controller('ton-payment/user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 

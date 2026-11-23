@@ -100,6 +100,7 @@ Re-run `pnpm db:generate` after every `schema.prisma` change.
 
 if you want to use orval sdk client methods you should generate client from your openapi json. You can start server `pnpm dev --filter api`.
 it starts server on 4000 port and /api-json on them. SDK generator use OPENAPI_INPUT_SRC with `localhost:4000/api-json` by default so you can run
+
 ```sh
 pnpm sdk:generate
 pnpm format  # just for formating sdk generated code
@@ -115,6 +116,7 @@ pnpm dev --filter {specific apps} # start dev server for choised apps
 ```
 
 API only / mini-app only:
+
 ```sh
 pnpm --filter api dev
 pnpm --filter tma dev

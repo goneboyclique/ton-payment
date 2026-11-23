@@ -9,7 +9,7 @@ import {
 } from 'src/common/dto/payment.dto';
 import { ZodResponse } from 'nestjs-zod';
 
-@Controller('payments')
+@Controller('ton-payment')
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 

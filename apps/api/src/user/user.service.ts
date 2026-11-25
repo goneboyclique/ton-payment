@@ -5,7 +5,7 @@ import { TelegramUser } from 'src/common/types/tgUser.type';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly prismaService: PrismaService) { }
 
   async findMe(telegramUser: TelegramUser) {
     return this.prismaService.client.user.upsert({
@@ -13,6 +13,12 @@ export class UserService {
       update: telegramUser,
       create: telegramUser,
     });
+  }
+
+  async findById(id: string) {
+    return this.prismaService.client.user.findUniqueOrThrow({
+      where: { id }
+    })
   }
 
   async updateTonAccountAddress(

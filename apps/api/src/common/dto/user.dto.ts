@@ -11,13 +11,12 @@ const UserResSchema = UserSchema.pick({
   is_premium: true,
 }).partial();
 
-export class UserFindUniqueReqDto extends createZodDto(
-  UserFindUniqueZodSchema,
-) {}
-export class UserFindUniqueResDto extends createZodDto(UserResSchema) {}
-
 export class UserUpdateTonAccountAddressDto extends createZodDto(
   UserSchema.pick({ ton_wallet_address: true }),
 ) {}
 
-export class UserMeResDto extends createZodDto(UserResSchema) {}
+export class UserFindByIdDto extends createZodDto(
+  UserSchema.pick({ id: true }),
+) {}
+
+export class UserResDto extends createZodDto(UserResSchema) {}
